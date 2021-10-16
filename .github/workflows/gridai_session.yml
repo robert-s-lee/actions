@@ -1,0 +1,113 @@
+name: "Grid.ai Session"
+on:
+  workflow_call:
+    inputs:
+      instance_type:
+        required: false
+        type: string
+      use_spot:
+        required: false
+        type: string
+      datastore:
+        required: false
+        type: string        
+    secrets:
+      username:
+        required: true
+      key:
+        required: true
+jobs:
+  gridai-session:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8' # min version supported by Grid.ai
+      - run: |
+          ssh-keygen -t ed25519 -C "${{ secrets.username }}" -N "" -f ~/.ssh/id_ed25519
+      - run: |
+          python -m pip install --upgrade pip
+      - run: |
+          pip install lightning-grid --upgrade
+      - run: |
+          # session name is truncated within github action due to screen size.  make it short
+          grid login --username ${{ secrets.username }} --key ${{ secrets.key }}
+          export DT=$(date '+%y%m%d-%H%M%S')
+          export GRIDAI_SESSION_PREFIX=s
+          export GRIDAI_SESSION_NAME="${GRIDAI_SESSION_PREFIX}${DT}"
+          echo "GRIDAI_SESSION_NAME=${GRIDAI_SESSION_NAME}" >> $GITHUB_ENV
+      - run: |
+          grid session create --use_spot --name ${GRIDAI_SESSION_NAME} | tee grid.session.log
+          export SESSION_NAME=$(grep " name: " grid.session.log | cut -d':' -f 2 | sed -e 's/^[[:space:]]*//')
+          if [[ "${GRIDAI_SESSION_NAME}" != "${SESSION_NAME}" ]]; then
+            echo "Error: ${GRIDAI_SESSION_NAME} requested but ${SESSION_NAME} was created"
+          fi
+          echo "SESSION_NAME=${SESSION_NAME}" >> $GITHUB_ENV
+      - run: |
+          grid session
+      - run: |
+          export SESSION_STATUS=$(grid session | awk '{print $2 "," $4}' | grep "${SESSION_NAME}," | awk -F, '{print $2}')
+          # pool at 1 min interval
+          while [ "${SESSION_STATUS}" != 'running' ]; do 
+            echo "${SESSION_NAME}:${SESSION_STATUS} waiting 60 sec for the next status"
+            sleep 60 
+            SESSION_STATUS=$(grid session | awk '{print $2 "," $4}' | grep "${SESSION_NAME}," | awk -F, '{print $2}')
+          done
+          case ${SESSION_STATUS} in
+            running)
+              ;;
+            *)
+              echo "Error: ${SESSION_NAME} did not start"
+              exit 1
+          esac
+      - run: |
+          grid ssh-keys add lit_key ~/.ssh/id_ed25519.pub
+      - run: |
+          grid session ssh ${SESSION_NAME} "ls; exit"
+      - run: |
+          grid session pause ${SESSION_NAME}
+      - run: |
+          export SESSION_STATUS=$(grid session | awk '{print $2 "," $4}' | grep "${SESSION_NAME}," | awk -F, '{print $2}')
+          # pool at 1 min interval
+          while [ "${SESSION_STATUS}" != 'paused' ]; do 
+            echo "${SESSION_NAME}:${SESSION_STATUS} waiting 60 sec for the next status"
+            sleep 60 
+            SESSION_STATUS=$(grid session | awk '{print $2 "," $4}' | grep "${SESSION_NAME}," | awk -F, '{print $2}')
+          done
+          case ${SESSION_STATUS} in
+            paused)
+              ;;
+            *)
+              echo "Error: ${SESSION_NAME} did not pause"
+              exit 1
+          esac
+      - run: |
+          grid session resume ${SESSION_NAME}
+      - run: |
+          export SESSION_STATUS=$(grid session | awk '{print $2 "," $4}' | grep "${SESSION_NAME}," | awk -F, '{print $2}')
+          # pool at 1 min interval
+          while [ "${SESSION_STATUS}" != 'running' ]; do 
+            echo "${SESSION_NAME}:${SESSION_STATUS} waiting 60 sec for the next status"
+            sleep 60 
+            SESSION_STATUS=$(grid session | awk '{print $2 "," $4}' | grep "${SESSION_NAME}," | awk -F, '{print $2}')
+          done
+          case ${SESSION_STATUS} in
+            running)
+              ;;
+            *)
+              echo "Error: ${SESSION_NAME} did not resume"
+              exit 1
+          esac    
+      - run: |
+          grid session ssh ${SESSION_NAME} "ls; exit"                            
+      - run: |
+          grid session delete ${SESSION_NAME}
+      - run: |
+          export SESSION_STATUS=$(grid session | awk '{print $2 "," $4}' | grep "${SESSION_NAME}," | awk -F, '{print $2}')
+          # pool at 1 min interval
+          while [ ! -z "${SESSION_STATUS}" ]; do 
+            echo "${SESSION_NAME}:${SESSION_STATUS} waiting 60 sec for the next status"
+            sleep 60 
+            SESSION_STATUS=$(grid session | awk '{print $2 "," $4}' | grep "${SESSION_NAME}," | awk -F, '{print $2}')
+          done           
