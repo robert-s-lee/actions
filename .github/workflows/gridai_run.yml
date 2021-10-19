@@ -79,7 +79,7 @@ jobs:
               echo "Error from grid status command: # ${cmd_err_cnt}"
               cat grid.status.log
               RUN_STATUS="unknown"
-              if [[ ( ${cmd_err_cnt} ) > ${{ inputs.max_cmd_err_cnt}} ]]; then
+              if [[ ${cmd_err_cnt} > ${{ inputs.max_cmd_err_cnt }} ]]; then
                 break
               fi
             else  
