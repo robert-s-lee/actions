@@ -10,6 +10,10 @@ on:
         required: false
         default: ""
         type: string     
+      grid_url:
+        required: false
+        default: ""
+        type: string    
       grid_args:
         required: false
         default: "--localdir --instance_type t2.medium --dependency_file requirements.txt"
@@ -34,6 +38,7 @@ on:
 jobs:
   gridai-run:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v2
         with:
@@ -46,6 +51,7 @@ jobs:
       - run: |
           pip install lightning-grid --upgrade
       - run: |
+          if [ ! -z "${{ inputs.grid_url }} "]; then export GRID_URL=${{ inputs.grid_url }}; fi
           grid login --username ${{ secrets.username }} --key ${{ secrets.key }}
       - run: |
           grid run ${{ inputs.grid_args }} ${{ inputs.script_name }} ${{ inputs.script_args }} | tee grid.run.log
@@ -60,8 +66,8 @@ jobs:
           RUN_STATUS=$(cat ${JSON_FILE} | jq -r -c '.[] | .status')
           # pool at 1 min interval
           while [ "${RUN_STATUS}" = 'queued' -o "${RUN_STATUS}" = 'running' -o "${RUN_STATUS}" = 'pending' ]; do 
-            echo "${RUN_NAME}:${RUN_STATUS} waiting 60 sec for the next status"
-            sleep 60 
+            echo "${RUN_NAME}:${RUN_STATUS} waiting ${{ inputs.poll_sec_interval }} sec for the next status"
+            sleep ${{ inputs.poll_sec_interval }}
             JSON_FILE=$(grid status --export json ${RUN_NAME} | grep Exported | awk '{print $5}')
             RUN_STATUS=$(cat ${JSON_FILE} | jq -r -c '.[] | .status')
           done
