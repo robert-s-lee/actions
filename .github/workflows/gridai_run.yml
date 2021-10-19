@@ -69,7 +69,7 @@ jobs:
           cmd_err_cnt=0
           RUN_STATUS=unknown
           grid status --export json ${RUN_NAME} > grid.status.log 2>&1
-          if [[ "$?" !=0 ]]; then
+          if [[ "$?" != 0 ]]; then
               (( cmd_err_cnt = cmd_err_cnt + 1 ))
           else
             JSON_FILE=$(cat grid.status.log | grep Exported | awk '{print $5}')
