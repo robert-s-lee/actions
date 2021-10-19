@@ -21,9 +21,11 @@ on:
       poll_sec_interval:
         required: false
         default: 60
+        type: string       
       max_sec_run:
         required: false
         default: 120
+        type: string       
     secrets:
       username:
         type: string        
