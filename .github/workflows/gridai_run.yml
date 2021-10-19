@@ -2,6 +2,14 @@ name: "Grid.ai Run"
 on:
   workflow_call:
     inputs:
+      script_name:
+        required: true
+        default: "run.py"
+        type: string   
+      repository:
+        required: false
+        default: ""
+        type: string     
       grid_args:
         required: false
         default: "--localdir --use_spot --instance_type t2.medium --dependency_file requirements.txt"
@@ -31,6 +39,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          repository: ${{ inputs.repository }}
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8' # min version supported by Grid.ai
@@ -41,7 +51,7 @@ jobs:
       - run: |
           grid login --username ${{ secrets.username }} --key ${{ secrets.key }}
       - run: |
-          grid run ${{ inputs.grid_args }} hello.py ${{ inputs.script_args }} | tee grid.run.log
+          grid run ${{ inputs.grid_args }} ${{ inputs.script_name }} ${{ inputs.script_args }} | tee grid.run.log
           RUN_NAME=$(grep grid_name grid.run.log | cut -d':' -f 2 | sed -e 's/^[[:space:]]*//')
           echo "RUN_NAME=${RUN_NAME}" >> $GITHUB_ENV
           if [[ -z "${RUN_NAME}" ]]; then
