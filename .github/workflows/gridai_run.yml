@@ -28,10 +28,8 @@ on:
         type: string       
     secrets:
       username:
-        type: string        
         required: true
       key:
-        type: string        
         required: true
 jobs:
   gridai-run:
