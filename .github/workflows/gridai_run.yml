@@ -89,7 +89,7 @@ jobs:
                 break
               fi
             else  
-              JSON_FILE=$( grid.status.log | grep Exported | awk '{print $5}')
+              JSON_FILE=$(cat grid.status.log | grep Exported | awk '{print $5}')
               RUN_STATUS=$(cat ${JSON_FILE} | jq -r -c '.[] | .status')
             fi
           done
