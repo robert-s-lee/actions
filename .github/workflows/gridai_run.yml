@@ -12,7 +12,7 @@ on:
         type: string     
       grid_args:
         required: false
-        default: "--localdir --use_spot --instance_type t2.medium --dependency_file requirements.txt"
+        default: "--localdir --instance_type t2.medium --dependency_file requirements.txt"
         type: string    
       script_args:
         required: false
