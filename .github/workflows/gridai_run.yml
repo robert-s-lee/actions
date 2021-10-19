@@ -33,7 +33,6 @@ on:
         required: true
 jobs:
   gridai-run:
-    timeout-minutes: ${{ inputs.max_sec_run }} 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
