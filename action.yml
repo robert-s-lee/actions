@@ -1,23 +1,24 @@
+# composite action must be 
+#  named action.yml or action.yaml
+#  create a Tag and a Release for our repo.
 name: 'Hello World'
-on:
-  workflow_call:
-    description: 'Greet someone'
-    inputs:
-      who-to-greet:  # id of input
-        description: 'Who to greet'
-        required: true
-        default: 'World'
-    outputs:
-      random-number:
-        description: "Random number"
-        value: ${{ steps.random-number-generator.outputs.random-id }}
-    runs:
-      using: "composite"
-      steps:
-        - run: echo Hello ${{ inputs.who-to-greet }}.
-          shell: bash
-        - id: random-number-generator
-          run: echo "::set-output name=random-id::$(echo $RANDOM)"
-          shell: bash
-        - run: ${{ github.action_path }}/goodbye.sh
-          shell: bash
+description: 'Greet someone'
+inputs:
+  who-to-greet:  # id of input
+    description: 'Who to greet'
+    required: true
+    default: 'World'
+outputs:
+  random-number:
+    description: "Random number"
+    value: ${{ steps.random-number-generator.outputs.random-id }}
+runs:
+  using: "composite"
+  steps:
+    - run: echo Hello ${{ inputs.who-to-greet }}.
+      shell: bash
+    - id: random-number-generator
+      run: echo "::set-output name=random-id::$(echo $RANDOM)"
+      shell: bash
+    - run: ${{ github.action_path }}/goodbye.sh
+      shell: bash
