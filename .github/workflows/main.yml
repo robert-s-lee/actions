@@ -1,3 +1,4 @@
+# example of https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
 on: [push]
 
 jobs:
@@ -7,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: foo
-        uses: actions/hello-world-composite-action@v1
+        uses: robert-s-lee/actions/action@main
         with:
           who-to-greet: 'Mona the Octocat'
       - run: echo random-number ${{ steps.foo.outputs.random-number }}
