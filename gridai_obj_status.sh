@@ -1,23 +1,23 @@
 # determine status of previous grid run command
 # run
-# ./gridai-obj-status.sh -i 1 run daring-perch-330
-# ./gridai-obj-status.sh -i 1 run rigorous-benz-3635 
-# ./gridai-obj-status.sh -i 1 run inescapable-coati-929
-# ./gridai-obj-status.sh -i 1 run fat-bullfinch-668
-# ./gridai-obj-status.sh -i 1 run bold-shockley-7806
-# ./gridai-obj-status.sh -i 1 run able-guan-94 
+# ./gridai_obj_status.sh -i 1 run daring-perch-330
+# ./gridai_obj_status.sh -i 1 run rigorous-benz-3635 
+# ./gridai_obj_status.sh -i 1 run inescapable-coati-929
+# ./gridai_obj_status.sh -i 1 run fat-bullfinch-668
+# ./gridai_obj_status.sh -i 1 run bold-shockley-7806
+# ./gridai_obj_status.sh -i 1 run able-guan-94 
 # session
-#  ./gridai-obj-status.sh -i 1 session fluffy-rubin-4046 #  pending -- wait and time out
-#  ./gridai-obj-status.sh -i 1 session g4dn-xlarge-1
+#  ./gridai_obj_status.sh -i 1 session fluffy-rubin-4046 #  pending -- wait and time out
+#  ./gridai_obj_status.sh -i 1 session g4dn-xlarge-1
 
 # datastore
 
-# ./gridai-obj-status.sh -i 1 datastore dali-mnist
-# ./gridai-obj-status.sh -i 1 datastore dali
+# ./gridai_obj_status.sh -i 1 datastore dali-mnist
+# ./gridai_obj_status.sh -i 1 datastore dali
 
 # cluster
-#  ./gridai-obj-status.sh -i 1 cluster us-east-1-211022-220523
-#  ./gridai-obj-status.sh -i 1 cluster c211020-020559
+#  ./gridai_obj_status.sh -i 1 cluster us-east-1-211022-220523
+#  ./gridai_obj_status.sh -i 1 cluster c211020-020559
 usage() { 
   cat <<EOF
 $0 [options] [run|session|cluster|datastore] id
@@ -194,5 +194,7 @@ echo "${OBJ_TYPE}:${OBJ_ID}:$(sort grid.tally.log | uniq -c - | paste -s -)"
 stty >/dev/null 2>&1
 
 # return the last status code
-echo $OBJ_STATUS
+echo "::set-output name=obj_summary::$(sort grid.tally.log | uniq -c - | paste -s -)"
+echo "::set-output name=obj_status::$OBJ_STATUS"
+echo "::set-output name=obj_exit_code::$RC"
 exit $RC
