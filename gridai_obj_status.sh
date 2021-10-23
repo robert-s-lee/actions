@@ -30,7 +30,7 @@ DEBUG() { if [ ! -z "$VERBOSE" ]; then echo "$@" 1>&2; fi;}
 MAX_POL_CNT=60  # max number of times to poll regardless of situtations
 CMD_POL_CNT=0   
 
-MAX_ERR_CNT=2   # cmd failed
+MAX_ERR_CNT=3   # cmd failed
 CMD_ERR_CNT=0
 
 MAX_NOID_CNT=2  # cmd successful but id NOT found   
