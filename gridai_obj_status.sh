@@ -27,7 +27,7 @@ EOF
 DEBUG() { if [ ! -z "$VERBOSE" ]; then echo "$@" 1>&2; fi;}
 
 # defaults and matching counters
-MAX_POL_CNT=10  # max number of times to poll regardless of situtations
+MAX_POL_CNT=60  # max number of times to poll regardless of situtations
 CMD_POL_CNT=0   
 
 MAX_ERR_CNT=2   # cmd failed
@@ -131,7 +131,7 @@ while [ $CMD_POL_CNT -lt $MAX_POL_CNT ]; do
   case $OBJ_TYPE in
     run)
       OBJ_ID_EXP="^${OBJ_ID}-exp[0-9]+$"
-      stty cols $MAX_TERM_COLS; grid status ${OBJ_ID} > grid.status.log 2>&1
+      grid status ${OBJ_ID} > grid.status.log 2>&1
       ;;
     session)
       OBJ_ID_EXP="^${OBJ_ID}$"
@@ -188,6 +188,7 @@ while [ $CMD_POL_CNT -lt $MAX_POL_CNT ]; do
 
   (( CMD_POL_CNT = CMD_POL_CNT + 1 ))
   echo "${CMD_POL_CNT}:${OBJ_TYPE}:${OBJ_ID}:$(sort grid.tally.log | uniq -c - | paste -s -)" 
+  sleep ${POLL_SEC_INTERVAL}
 done
 
 echo "${OBJ_TYPE}:${OBJ_ID}:$(sort grid.tally.log | uniq -c - | paste -s -)" 
