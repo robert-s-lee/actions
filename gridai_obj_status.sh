@@ -1,3 +1,4 @@
+
 # determine status of previous grid run command
 # run
 # ./gridai_obj_status.sh -i 1 run daring-perch-330
