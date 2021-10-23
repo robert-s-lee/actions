@@ -22,3 +22,5 @@ runs:
       shell: bash
     - run: ${{ github.action_path }}/goodbye.sh
       shell: bash
+    - run: |
+
