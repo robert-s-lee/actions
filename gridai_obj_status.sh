@@ -131,7 +131,7 @@ while [ $CMD_POL_CNT -lt $MAX_POL_CNT ]; do
   case $OBJ_TYPE in
     run)
       OBJ_ID_EXP="^${OBJ_ID}-exp[0-9]+$"
-      grid status ${OBJ_ID} > grid.status.log 2>&1
+      stty cols $MAX_TERM_COLS; grid status ${OBJ_ID} > grid.status.log 2>&1
       ;;
     session)
       OBJ_ID_EXP="^${OBJ_ID}$"
