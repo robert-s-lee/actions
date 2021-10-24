@@ -180,6 +180,7 @@ while [ $CMD_POL_CNT -lt $MAX_POL_CNT ]; do
       if [[ MAX_SOME_CNT -gt 0 && CMD_SOME_CNT -ge MAX_SOME_CNT ]]; then break; fi  
   else 
     DEBUG "ALL matched status"
+    cat grid.status.log
     RC=0
     break    
   fi
