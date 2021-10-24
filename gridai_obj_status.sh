@@ -119,9 +119,6 @@ case $OBJ_TYPE in
     ;;
 esac
 
-# increase stty column so that long names are fully displayed
-if [[ ! -z "$MAX_TERM_COLS" ]]; then stty cols $MAX_TERM_COLS; fi
-
 # pool at interval
 RC=1
 echo "${OBJ_TYPE}:${OBJ_ID}: looking for ${SOME_THRESHOLD_PERCENT}% in ${TARGET_STATE}" 
@@ -131,19 +128,19 @@ while [ $CMD_POL_CNT -lt $MAX_POL_CNT ]; do
   case $OBJ_TYPE in
     run)
       OBJ_ID_EXP="^${OBJ_ID}-exp[0-9]+$"
-      grid status ${OBJ_ID} > grid.status.log 2>&1
+      export COLUMNS=$MAX_TERM_COLS; grid status ${OBJ_ID} > grid.status.log 2>&1
       ;;
     session)
       OBJ_ID_EXP="^${OBJ_ID}$"
-      grid session > grid.status.log 2>&1
+      export COLUMNS=$MAX_TERM_COLS; grid session > grid.status.log 2>&1
       ;;
     datastore)
       OBJ_ID_EXP="^${OBJ_ID}$"
-      grid datastore > grid.status.log 2>&1
+      export COLUMNS=$MAX_TERM_COLS; grid datastore > grid.status.log 2>&1
       ;;
     cluster) 
       OBJ_ID_EXP="^${OBJ_ID}$"
-      grid clusters > grid.status.log 2>&1
+      export COLUMNS=$MAX_TERM_COLS; grid clusters > grid.status.log 2>&1
       ;;
     *) 
       usage 
@@ -193,8 +190,6 @@ while [ $CMD_POL_CNT -lt $MAX_POL_CNT ]; do
 done
 
 echo "${OBJ_TYPE}:${OBJ_ID}:${OBJ_SUMMARY}" 
-# reset the stty back to original
-stty >/dev/null 2>&1
 
 # return the last status code
 echo "::set-output name=obj_summary::${OBJ_SUMMARY}"
