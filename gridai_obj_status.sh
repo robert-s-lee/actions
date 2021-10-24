@@ -108,7 +108,7 @@ case $OBJ_TYPE in
     OBJ_DURATION_COL=6
     ;;
   cluster)    
-    TARGET_STATE="running" 
+    TARGET_STATE="running|failed" 
     OBJ_ID_COL=2 
     OBJ_STATUS_COL=5
     OBJ_DURATION_COL=6

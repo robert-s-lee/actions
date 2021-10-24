@@ -37,9 +37,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: robert-s-lee/gridai_action_login@main
         with:
-          python-version: '3.8' # min version supported by Grid.ai
+          username: ${{ secrets.username }} 
+          key: ${{ secrets.key }} 
       - uses: aws-actions/setup-sam@v1
       - uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -47,10 +48,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.aws_secret_access_key }}
           aws-region: us-east-1         
       - uses: hashicorp/setup-terraform@v1
-      - uses: robert-s-lee/gridai_action_login@main
-        with:
-          username: ${{ secrets.username }} 
-          key: ${{ secrets.key }} 
       - run: |
           terraform init
       - run: |
