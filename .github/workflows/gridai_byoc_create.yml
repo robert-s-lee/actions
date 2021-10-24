@@ -47,12 +47,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.aws_secret_access_key }}
           aws-region: us-east-1         
       - uses: hashicorp/setup-terraform@v1
-      - run: |
-          python -m pip install --upgrade pip
-      - run: |
-          pip install lightning-grid --upgrade
-      - run: |
-          grid login --username ${{ secrets.username }} --key ${{ secrets.key }}
+      - uses: robert-s-lee/gridai_action_login@main
+        with:
+          username: ${{ secrets.username }} 
+          key: ${{ secrets.key }} 
       - run: |
           terraform init
       - run: |
@@ -62,46 +60,14 @@ jobs:
           cat tf.output.json
           # the first line is program name
       - run: |
+          export cluster_name=${{ inputs.cluster_name }}
+          echo "cluster_name=${cluster_name}" >> $GITHUB_ENV
           export EXTERNAL_ID=$(cat tf.output.json | tail -n +2 | jq -r '.external_id.value')
           export ROLE_ARN=$(cat tf.output.json | tail -n +2 | jq -r '.role_arn.value')
           echo EXTERNAL_ID=${EXTERNAL_ID}
           echo ROLE_ARN=${ROLE_ARN}
-          grid clusters ${{ inputs.cloud_provider }} ${{ inputs.grid_args }} --role-arn ${ROLE_ARN} --external-id ${EXTERNAL_ID} --region ${{ inputs.cluster_region }} --instance-types ${{ inputs.instance_types }} ${{ inputs.cluster_name }}
-      - run: |
-          cmd_err_cnt=0
-          CLUSTER_STATUS=unknown
-          grid clusters > grid.status.log 2>&1
-          if [[ "$?" != 0 ]]; then
-              (( cmd_err_cnt = cmd_err_cnt + 1 ))
-          else
-            CLUSTER_STATUS=$(cat grid.status.log | grep ${{ inputs.cluster_name }} | awk '{print $8}')
-          fi        
-          cat grid.status.log  
-          # pool at 1 min interval
-          while [ -z "${CLUSTER_STATUS}" -o "${CLUSTER_STATUS}" = 'pending' -o "${CLUSTER_STATUS}" = 'unknown' ]; do 
-            echo "${{ inputs.cluster_name }}:${CLUSTER_STATUS} waiting 60 sec for the next status"
-            sleep 60
-            grid clusters > grid.status.log 2>&1
-            if [[ "$?" != 0 || -z "${CLUSTER_STATUS}" ]]; then
-              (( cmd_err_cnt = cmd_err_cnt + 1 ))
-              echo "Error from grid clusters command: # ${cmd_err_cnt}"
-              cat grid.status.log
-              CLUSTER_STATUS="unknown"
-              if (( ${cmd_err_cnt} > 10 )); then
-                break
-              fi
-            else  
-              CLUSTER_STATUS=$(cat grid.status.log | grep ${{ inputs.cluster_name }} | awk '{print $8}')
-            fi
-          done
-          cat grid.status.log  
-          echo "${{ inputs.cluster_name }}:${CLUSTER_STATUS}"
-          # only continue on successful completion
-          case ${CLUSTER_STATUS} in
-            running)
-              echo "${{ inputs.cluster_name }}:completed"
-              ;;
-            *)
-              echo "Error: ${{ inputs.cluster_name }} did not finish correctly."
-              exit 1
-          esac
+          grid clusters ${{ inputs.cloud_provider }} ${{ inputs.grid_args }} --role-arn ${ROLE_ARN} --external-id ${EXTERNAL_ID} --region ${{ inputs.cluster_region }} --instance-types ${{ inputs.instance_types }} ${cluster_name}
+      - uses: robert-s-lee/actions@main
+        with:
+          obj_type: cluster 
+          obj_id: ${cluster_name}
