@@ -159,6 +159,7 @@ while [ $CMD_POL_CNT -lt $MAX_POL_CNT ]; do
   TOTAL_ENTRIES=$((`cat grid.tally.log | wc -l`))
   TOTAL_MATCH=$((`egrep -w -e "$TARGET_STATE" grid.tally.log | wc -l`))
   OBJ_STATUS=$(cat grid.tally.log | paste -s -d, -)
+  OBJ_SUMMARY=$(sort grid.tally.log | uniq -c - | paste -s -)
   DEBUG "TOTAL_ENTRIES=$TOTAL_ENTRIES TOTAL_MATCH=$TOTAL_MATCH"
 
   # exit condition checks
@@ -187,16 +188,22 @@ while [ $CMD_POL_CNT -lt $MAX_POL_CNT ]; do
   fi
 
   (( CMD_POL_CNT = CMD_POL_CNT + 1 ))
-  echo "${CMD_POL_CNT}:${OBJ_TYPE}:${OBJ_ID}:$(sort grid.tally.log | uniq -c - | paste -s -)" 
+  echo "${CMD_POL_CNT}:${OBJ_TYPE}:${OBJ_ID}:${OBJ_SUMMARY}" 
   sleep ${POLL_SEC_INTERVAL}
 done
 
-echo "${OBJ_TYPE}:${OBJ_ID}:$(sort grid.tally.log | uniq -c - | paste -s -)" 
+echo "${OBJ_TYPE}:${OBJ_ID}:${OBJ_SUMMARY}" 
 # reset the stty back to original
 stty >/dev/null 2>&1
 
 # return the last status code
-echo "::set-output name=obj_summary::$(sort grid.tally.log | uniq -c - | paste -s -)"
-echo "::set-output name=obj_status::$OBJ_STATUS"
-echo "::set-output name=obj_exit_code::$RC"
+echo "::set-output name=obj_summary::${OBJ_SUMMARY}"
+echo "::set-output name=obj_status::${OBJ_STATUS}"
+echo "::set-output name=obj_exit_code::${RC}"
+
+# TODO: workaround until we figure out how to use the above
+echo "obj_summary=${OBJ_SUMMARY}" >> $GITHUB_ENV
+echo "obj_status=${OBJ_STATUS}" >> $GITHUB_ENV
+echo "obj_exit_code=${RC}" >> $GITHUB_ENV
+
 exit $RC

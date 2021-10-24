@@ -55,7 +55,7 @@ jobs:
       - run: |
           pip install lightning-grid --upgrade
       - run: |
-          if [ ! -z "${{ inputs.grid_url }} "]; then export GRID_URL=${{ inputs.grid_url }}; fi
+          if [ ! -z "${{ inputs.grid_url }}" ]; then export GRID_URL=${{ inputs.grid_url }}; fi
           grid login --username ${{ secrets.username }} --key ${{ secrets.key }}
       - run: |
           grid run ${{ inputs.grid_args }} ${{ inputs.script_name }} ${{ inputs.script_args }} | tee grid.run.log
