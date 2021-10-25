@@ -1,0 +1,65 @@
+name: "Grid.ai Run Artifact"
+on:
+  workflow_call:
+    inputs:
+      script_name:
+        required: true
+        default: "run.py"
+        type: string   
+      repository:
+        required: false
+        default: ""
+        type: string     
+      grid_url:
+        required: false
+        default: ""
+        type: string    
+      grid_args:
+        required: false
+        default: "--localdir --instance_type t2.medium --dependency_file requirements.txt"
+        type: string    
+      script_args:
+        required: false
+        default: ""
+        type: string           
+    secrets:
+      gridai_username:
+        required: true
+      gridai_key:
+        required: true
+jobs:
+  gridai-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: ${{ inputs.repository }}
+      - uses: gridai-actions/gridai-login@v0
+        with:
+          gridai_username: ${{ secrets.gridai_username }} 
+          gridai_key: ${{ secrets.gridai_key }}
+      - run: |
+          grid run ${{ inputs.grid_args }} ${{ inputs.script_name }} ${{ inputs.script_args }} | tee grid.run.log
+          export run_name=$(cat grid.run.log | awk -F: 's1=/grid_name/ {print $2}' | tr -s '[:blank:]')
+          echo "run_name=${run_name}" >> $GITHUB_ENV           
+          if [[ -z "${run_name}" ]]; then
+            echo "Error: 'grid_name:[run_name]' not found in output"
+            exit 1
+          fi        
+      - id: grid_status
+        uses: gridai-actions/gridai-status@v0
+        with:
+          obj_type: run
+          obj_id: ${run_name}
+      - run: |
+          if [ "${{ steps.grid_status.outputs.obj_status }}" != "succeeded" ]; then
+            exit 1
+          fi             
+      - run: |
+          grid artifacts ${{ env.run_name }}
+          if [[ $? != 0 ]]; then
+            echo "Error: ${run_name} artifacts not found"
+            exit 1
+          fi
+          ls grid_artifacts/*
