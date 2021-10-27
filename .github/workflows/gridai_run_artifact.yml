@@ -40,7 +40,7 @@ jobs:
           gridai-username: ${{ secrets.gridai-username }} 
           gridai-key: ${{ secrets.gridai-key }}
       - run: |
-          grid run ${{ inputs.grid_args }} ${{ inputs.script-name }} ${{ inputs.script-args }} | tee grid.run.log
+          grid run ${{ inputs.grid-args }} ${{ inputs.script-name }} ${{ inputs.script-args }} | tee grid.run.log
           export run_name=$(cat grid.run.log | awk -F: '$1=/grid_name/ {print $2}' | tr -s '[:blank:]')
           echo "run_name=${run_name}" >> $GITHUB_ENV           
           if [[ -z "${run_name}" ]]; then
