@@ -12,9 +12,9 @@ on:
         required: false
         type: string        
     secrets:
-      username:
+      gridai-username:
         required: true
-      key:
+      gridai-key:
         required: true
 jobs:
   gridai-session:

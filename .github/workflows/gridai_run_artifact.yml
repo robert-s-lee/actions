@@ -2,7 +2,7 @@ name: "Grid.ai Run Artifact"
 on:
   workflow_call:
     inputs:
-      script_name:
+      script-name:
         required: true
         default: "run.py"
         type: string   
@@ -10,22 +10,22 @@ on:
         required: false
         default: ""
         type: string     
-      grid_url:
+      grid-url:
         required: false
         default: ""
         type: string    
-      grid_args:
+      grid-args:
         required: false
         default: "--localdir --instance_type t2.medium --dependency_file requirements.txt"
         type: string    
-      script_args:
+      script-args:
         required: false
         default: ""
         type: string           
     secrets:
-      gridai_username:
+      gridai-username:
         required: true
-      gridai_key:
+      gridai-key:
         required: true
 jobs:
   gridai-run:
@@ -37,10 +37,10 @@ jobs:
           repository: ${{ inputs.repository }}
       - uses: gridai-actions/gridai-login@v0
         with:
-          gridai-username: ${{ secrets.gridai_username }} 
-          gridai-key: ${{ secrets.gridai_key }}
+          gridai-username: ${{ secrets.gridai-username }} 
+          gridai-key: ${{ secrets.gridai-key }}
       - run: |
-          grid run ${{ inputs.grid_args }} ${{ inputs.script_name }} ${{ inputs.script_args }} | tee grid.run.log
+          grid run ${{ inputs.grid_args }} ${{ inputs.script-name }} ${{ inputs.script-args }} | tee grid.run.log
           export run_name=$(cat grid.run.log | awk -F: '$1=/grid_name/ {print $2}' | tr -s '[:blank:]')
           echo "run_name=${run_name}" >> $GITHUB_ENV           
           if [[ -z "${run_name}" ]]; then
@@ -53,7 +53,7 @@ jobs:
           obj-type: run
           obj-id: ${run_name}
       - run: |
-          if [ "${{ steps.grid-status.outputs.obj_status }}" != "succeeded" ]; then
+          if [ "${{ steps.grid-status.outputs.obj-status }}" != "succeeded" ]; then
             exit 1
           fi             
       - run: |
