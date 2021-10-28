@@ -54,7 +54,7 @@ jobs:
           export SCRIPT_ARGS="${{ inputs.script-args }}"
           if [ "${{ matrix.g-instance_type }}" = "--instance_type g4dn.xlarge" ]; then
             GRID_ARGS="--gpus 1 ${GRID_ARGS}"
-            SCRIPT_ARGS="--gpus 1 ${GRID_ARGS}"
+            SCRIPT_ARGS="--gpus 1 ${SCRIPT_ARGS}"
           fi
           if [ "${{ matrix.g-strategy }}" = "--strategy random_search" ]; then
             GRID_ARGS="--trials 1 ${GRID_ARGS}"
