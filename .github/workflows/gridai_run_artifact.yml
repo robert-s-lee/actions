@@ -28,8 +28,16 @@ on:
       gridai-key:
         required: true
 jobs:
-  gridai-run:
-    runs-on: ubuntu-latest
+  unittests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        g-use_spot:        ["", "--use_spot"]   
+        g-localdir:        ["", "--localdir"]   
+        g-instance_type:   ["--instance_type g4dn.xlarge", "--instance_type t2.medium"]   
+        g-dependency_file: ["", "--dependency_file requirements.txt"]
+        g-strategy:        ["--strategy random_search", "--strategy grid_search"]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v2
@@ -40,7 +48,21 @@ jobs:
           gridai-username: ${{ secrets.gridai-username }} 
           gridai-key: ${{ secrets.gridai-key }}
       - run: |
-          grid run ${{ inputs.grid-args }} ${{ inputs.script-name }} ${{ inputs.script-args }} | tee grid.run.log
+          export GRID_ARGS=${{ inputs.grid-args }}
+          export SCRIPT_ARGS=${{ inputs.script-args }}
+          if [ "${{ grid-instance_type }}" = "--instance_type g4dn.xlarge" ]; then
+            GRID_ARGS="--gpus 1 ${GRID_ARGS}"
+            SCRIPT_ARGS="--gpus 1 ${GRID_ARGS}"
+          fi
+          if [ "${{ grid-strategy }}" = "--strategy random_search" ]; then
+            GRID_ARGS="--gpus 1 ${GRID_ARGS}"
+            SCRIPT_ARGS="--gpus 1 ${GRID_ARGS}"
+          fi
+          echo "GRID_ARGS=$GRID_ARGS" >> $GITHUB_ENV
+          echo "SCRIPT_ARGS=$SCRIPT_ARGS" >> $GITHUB_ENV
+      - run: |
+          grid run ${GRID_ARGS} ${{ inputs.script-name }} ${SCRIPT_ARGS} | tee grid.run.log
+      - run: |
           export run_name=$(cat grid.run.log | awk -F: '$1=/grid_name/ {print $2}' | tr -s '[:blank:]')
           echo "run_name=${run_name}" >> $GITHUB_ENV           
           if [[ -z "${run_name}" ]]; then
