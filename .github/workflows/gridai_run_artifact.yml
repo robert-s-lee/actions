@@ -30,13 +30,15 @@ on:
 jobs:
   unittests:
     strategy:
+      fail-fast: false
+      max-parallel: 1
       matrix:
         os: [ubuntu-latest]
         g-use_spot:        ["", "--use_spot"]   
-        g-localdir:        ["", "--localdir"]   
-        g-dependency_file: ["", "--dependency_file requirements.txt"]
-        g-instance_type:   ["--instance_type g4dn.xlarge", "--instance_type t2.medium"]   
-        g-strategy:        ["--strategy random_search", "--strategy grid_search"]
+        g-localdir:        ["--localdir", ""]   
+        g-dependency_file: ["--dependency_file requirements.txt", ""]
+        g-instance_type:   ["--instance_type t2.medium", "--instance_type g4dn.xlarge"]   
+        g-strategy:        [ "--strategy grid_search", "--strategy random_search"]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     steps:
