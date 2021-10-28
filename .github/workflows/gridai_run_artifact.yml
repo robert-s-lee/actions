@@ -50,7 +50,7 @@ jobs:
           gridai-username: ${{ secrets.gridai-username }} 
           gridai-key: ${{ secrets.gridai-key }}
       - run: |
-          export GRID_ARGS="${{ inputs.grid-args }} ${{ matrix.g-use_spot }} ${{ matrix.g-localdir }} ${{ matrix.g-dependency_file }}""
+          export GRID_ARGS="${{ inputs.grid-args }} ${{ matrix.g-use_spot }} ${{ matrix.g-localdir }} ${{ matrix.g-dependency_file }}"
           export SCRIPT_ARGS="${{ inputs.script-args }}"
           if [ "${{ matrix.g-instance_type }}" = "--instance_type g4dn.xlarge" ]; then
             GRID_ARGS="--gpus 1 ${GRID_ARGS}"
