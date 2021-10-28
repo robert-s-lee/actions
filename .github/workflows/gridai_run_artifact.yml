@@ -34,8 +34,8 @@ jobs:
         os: [ubuntu-latest]
         g-use_spot:        ["", "--use_spot"]   
         g-localdir:        ["", "--localdir"]   
-        g-instance_type:   ["--instance_type g4dn.xlarge", "--instance_type t2.medium"]   
         g-dependency_file: ["", "--dependency_file requirements.txt"]
+        g-instance_type:   ["--instance_type g4dn.xlarge", "--instance_type t2.medium"]   
         g-strategy:        ["--strategy random_search", "--strategy grid_search"]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
@@ -48,13 +48,13 @@ jobs:
           gridai-username: ${{ secrets.gridai-username }} 
           gridai-key: ${{ secrets.gridai-key }}
       - run: |
-          export GRID_ARGS=${{ inputs.grid-args }}
+          export GRID_ARGS=${{ inputs.grid-args }} ${{ matrix.g-use_spot}} ${{ matrix.g-localdir }} ${{ matrix.g-dependency_file }}
           export SCRIPT_ARGS=${{ inputs.script-args }}
-          if [ "${{ g-instance_type }}" = "--instance_type g4dn.xlarge" ]; then
+          if [ "${{ matrix.g-instance_type }}" = "--instance_type g4dn.xlarge" ]; then
             GRID_ARGS="--gpus 1 ${GRID_ARGS}"
             SCRIPT_ARGS="--gpus 1 ${GRID_ARGS}"
           fi
-          if [ "${{ g-strategy }}" = "--strategy random_search" ]; then
+          if [ "${{ matrix.g-strategy }}" = "--strategy random_search" ]; then
             GRID_ARGS="--trials 1 ${GRID_ARGS}"
           fi
           echo "GRID_ARGS=${GRID_ARGS}" >> $GITHUB_ENV
