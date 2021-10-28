@@ -50,16 +50,15 @@ jobs:
       - run: |
           export GRID_ARGS=${{ inputs.grid-args }}
           export SCRIPT_ARGS=${{ inputs.script-args }}
-          if [ "${{ grid-instance_type }}" = "--instance_type g4dn.xlarge" ]; then
+          if [ "${{ g-instance_type }}" = "--instance_type g4dn.xlarge" ]; then
             GRID_ARGS="--gpus 1 ${GRID_ARGS}"
             SCRIPT_ARGS="--gpus 1 ${GRID_ARGS}"
           fi
-          if [ "${{ grid-strategy }}" = "--strategy random_search" ]; then
-            GRID_ARGS="--gpus 1 ${GRID_ARGS}"
-            SCRIPT_ARGS="--gpus 1 ${GRID_ARGS}"
+          if [ "${{ g-strategy }}" = "--strategy random_search" ]; then
+            GRID_ARGS="--trials 1 ${GRID_ARGS}"
           fi
-          echo "GRID_ARGS=$GRID_ARGS" >> $GITHUB_ENV
-          echo "SCRIPT_ARGS=$SCRIPT_ARGS" >> $GITHUB_ENV
+          echo "GRID_ARGS=${GRID_ARGS}" >> $GITHUB_ENV
+          echo "SCRIPT_ARGS=${SCRIPT_ARGS}" >> $GITHUB_ENV
       - run: |
           grid run ${GRID_ARGS} ${{ inputs.script-name }} ${SCRIPT_ARGS} | tee grid.run.log
       - run: |
